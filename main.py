@@ -24,13 +24,15 @@ def build_parser():
     subparesers.add_parser("init", help="create the database and tables")
 
     subparesers.add_parser("list-properties", help="List all properties")
+
+    view = subparesers.add_parser("view-property", help="show one property in full" )
     
     add = subparesers.add_parser("add-property", help="Add a new property")
     add.add_argument("--name", required=True, help="short unique name")
     add.add_argument("--address", required=True, help="Full address")
     add.add_argument("--rent", required=True, type=pounds_to_pence, help="Monthly rent in pounds, e.g. 850")
     add.add_argument("--bedrooms", type=int, help="Number of bedrooms")
-    
+    view.add_argument("--id", type=int, required=True, help="The property number")
     return parser
 
 def main():
@@ -49,6 +51,7 @@ def main():
             print(f"Could not add the property: {error}")
         else:
             print(f"Property {property_id} added: {args.name}")
+
     if args.command == "list-properties":
         rows = properties.list_properties()
         if not rows:
@@ -57,6 +60,16 @@ def main():
             rent = row["monthly_rent_pence"] / 100
             print(f'{row["property_id"]:>3} {row["name"]:<12} {row["address"]:<30} £{rent:>8.2f} {row["status"]}')
 
+    if args.command == "view-property":
+        row = properties.get_property(args.id)
+        if row is None:
+            print(f'No property with id {args.id}.')
+        else:
+            print(f' Property {row["property_id"]}: {row["name"]}')
+            print(f' Address: {row["address"]}')
+            print(f' Bedrooms: {row["bedrooms"]}')
+            print(f' Rent: £{row["monthly_rent_pence"] / 100:.2f} a month')
+            print(f' Status: {row["status"]} ')
 
 
 if __name__ == "__main__":
