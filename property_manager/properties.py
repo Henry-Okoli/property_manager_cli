@@ -12,3 +12,25 @@ def add_property(name, address, rent_pence, bedrooms=None):
         return cursor.lastrowid
     finally:
         connection.close()
+
+def list_properties():
+    connection = get_connection()
+    try:
+        rows = connection.execute(
+            "SELECT property_id, name, address, bedrooms, monthly_rent_pence, status "
+            "FROM properties WHERE is_archived = 0 ORDER BY property_id"
+        ).fetchall()
+        return rows
+    finally:
+        connection.close()
+
+#def list_properties():
+    connection = get_connection()
+    try:
+        rows = connection.execute(
+            "SELECT property_id, name, address, bedrooms, monthly_rent_pence, status"
+            "FROM properties WHERE is_archived = 0 ORDER BY property_id"
+        ).fetchall()
+        return rows
+    finally:
+        connection.close() 
