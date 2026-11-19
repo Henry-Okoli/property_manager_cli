@@ -22,6 +22,8 @@ def build_parser():
     subparesers = parser.add_subparsers(dest="command", required=True)
 
     subparesers.add_parser("init", help="create the database and tables")
+
+    subparesers.add_parser("list-properties", help="List all properties")
     
     add = subparesers.add_parser("add-property", help="Add a new property")
     add.add_argument("--name", required=True, help="short unique name")
@@ -47,6 +49,15 @@ def main():
             print(f"Could not add the property: {error}")
         else:
             print(f"Property {property_id} added: {args.name}")
+    if args.command == "list-properties":
+        rows = properties.list_properties()
+        if not rows:
+            print("No properties yet.")
+        for row in rows:
+            rent = row["monthly_rent_pence"] / 100
+            print(f'{row["property_id"]:>3} {row["name"]:<12} {row["address"]:<30} £{rent:>8.2f} {row["status"]}')
+
+
 
 if __name__ == "__main__":
     main()
