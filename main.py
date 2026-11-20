@@ -19,16 +19,16 @@ def build_parser():
         prog="main.py",
         description="Property Management CLI",
     )
-    subparesers = parser.add_subparsers(dest="command", required=True)
+    subparsers = parser.add_subparsers(dest="command", required=True)
 
-    subparesers.add_parser("init", help="create the database and tables")
+    subparsers.add_parser("init", help="create the database and tables")
 
-    subparesers.add_parser("list-properties", help="List all properties")
+    subparsers.add_parser("list-properties", help="List all properties")
 
-    view = subparesers.add_parser("view-property", help="show one property in full" )
+    view = subparsers.add_parser("view-property", help="show one property in full" )
 
 
-    update = subparesers.add_parser("update-property", help="Change details of the property")
+    update = subparsers.add_parser("update-property", help="Change details of the property")
     update.add_argument("--id", type=int, required=True, help="The property number")
     update.add_argument("--name")
     update.add_argument("--address")
@@ -38,7 +38,7 @@ def build_parser():
 
 
 
-    add = subparesers.add_parser("add-property", help="Add a new property")
+    add = subparsers.add_parser("add-property", help="Add a new property")
     add.add_argument("--name", required=True, help="short unique name")
     add.add_argument("--address", required=True, help="Full address")
     add.add_argument("--rent", required=True, type=pounds_to_pence, help="Monthly rent in pounds, e.g. 850")
@@ -79,7 +79,7 @@ def main():
             print(f'No property with id {args.id}.')
         else:
             print(f' Property {row["property_id"]}: {row["name"]}')
-            print(f' Addre`ss: {row["address"]}')
+            print(f' Address: {row["address"]}')
             print(f' Bedrooms: {row["bedrooms"]}')
             print(f' Rent: £{row["monthly_rent_pence"] / 100:.2f} a month')
             print(f' Status: {row["status"]} ')
