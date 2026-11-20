@@ -70,3 +70,18 @@ def update_property(property_id, name=None, address=None, bedrooms=None,
     finally:
         connection.close
 
+
+def archive_property(property_id):      # this will help keep the our files instead of delecting them. they are in the database but not active
+    connection = get_connection()
+    try:
+        with connection:
+            cursor = connection.execute(
+                "UPDATE properties SET is_archived = 1 "
+                "WHERE property_id = ? AND is_archived = 0",
+                (property_id,),
+            )
+        return cursor.rowcount
+    finally:
+        connection.close()
+
+
