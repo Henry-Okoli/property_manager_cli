@@ -1,3 +1,9 @@
+# COALESCE(a, b), which means “use a, but if a is empty (NULL), 
+# use b.” So rent = COALESCE(new_rent, rent) means “use the new 
+# rent if one was given, otherwise keep the current one
+
+
+
 from property_manager.db import get_connection
 
 def add_property(name, address, rent_pence, bedrooms=None):
@@ -44,3 +50,23 @@ def get_property(property_id):
         ).fetchone()
     finally:
         connection.close()
+
+def update_property(property_id, name=None, address=None, bedrooms=None, 
+                    rent_pence=None, status=None):
+    connection = get_connection()
+    try:
+        with connection:
+            cursor = connection.execute(            #COALESCE(?, name)	Use the new value if given, otherwise keep the current one.
+                "UPDATE properties SET "
+                "name = COALESCE(?, name), "
+                "address = COALESCE(?, address), "
+                "bedrooms = COALESCE(?, bedrooms), "
+                "monthly_rent_pence = COALESCE(?, monthly_rent_pence), "
+                "status = COALESCE (?, status) "
+                "WHERE property_id = ?",
+                (name, address, bedrooms, rent_pence, status, property_id),
+            )
+        return cursor.rowcount
+    finally:
+        connection.close
+
