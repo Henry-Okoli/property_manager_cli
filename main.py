@@ -37,6 +37,8 @@ def build_parser():
     update.add_argument("--status", choices=["available", "occupied", "maintenance"])
 
 
+    archive = subparsers.add_parser("archive-property", help="hide property (it history is kept)") # archive property
+    archive.add_argument("--id", type=int, required=True, help="The property number")
 
     add = subparsers.add_parser("add-property", help="Add a new property")
     add.add_argument("--name", required=True, help="short unique name")
@@ -102,6 +104,16 @@ def main():
                 print(f"No property with id {args.id}.")
             else:
                 print(f"Property {args.id} updated.")
+
+
+    if args.command == "archive-property":
+        changed = properties.archive_property(args.id)
+        if changed == 0:
+            print(f"No active property with id {args.id}.")
+        else:
+            print(f"Property {args.id} archived.")
+
+    
 
 if __name__ == "__main__":
     main()
