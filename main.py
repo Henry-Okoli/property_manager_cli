@@ -23,11 +23,13 @@ def build_parser():
 
     subparsers.add_parser("init", help="create the database and tables")
 
+# list properties
     subparsers.add_parser("list-properties", help="List all properties")
 
+# view property
     view = subparsers.add_parser("view-property", help="show one property in full" )
 
-
+# update properites
     update = subparsers.add_parser("update-property", help="Change details of the property")
     update.add_argument("--id", type=int, required=True, help="The property number")
     update.add_argument("--name")
@@ -36,10 +38,16 @@ def build_parser():
     update.add_argument("--rent", type=pounds_to_pence, help="New monthly rent in pounds")
     update.add_argument("--status", choices=["available", "occupied", "maintenance"])
 
-
+# archive properies
     archive = subparsers.add_parser("archive-property", help="hide property (it history is kept)") # archive property
     archive.add_argument("--id", type=int, required=True, help="The property number")
 
+#search properties
+    search = subparsers.add_parser("search-properties", help="Find properties by text or status")
+    search.add_argument("--text", help="Part of the name or address")
+    search.add_argument("--status", choices=["available", "occupied", "maintenace"])
+
+#add properties
     add = subparsers.add_parser("add-property", help="Add a new property")
     add.add_argument("--name", required=True, help="short unique name")
     add.add_argument("--address", required=True, help="Full address")
@@ -47,6 +55,16 @@ def build_parser():
     add.add_argument("--bedrooms", type=int, help="Number of bedrooms")
     view.add_argument("--id", type=int, required=True, help="The property number")
     return parser
+
+
+def print_properties(rows):
+    if not rows:
+        print("No properties found.")
+    for row in rows:
+        rent = row["monthly_rent_pence"] / 100
+        print(f'{row["property_id"]:>3} {row["name"]:<12} {row["address"]:<30} £{rent:>8.2f} {row["status"]}')
+
+
 
 def main():
     parser = build_parser()
@@ -67,12 +85,13 @@ def main():
 
 
     if args.command == "list-properties":
-        rows = properties.list_properties()
-        if not rows:
-            print("No properties yet.")
-        for row in rows:
-            rent = row["monthly_rent_pence"] / 100
-            print(f'{row["property_id"]:>3} {row["name"]:<12} {row["address"]:<30} £{rent:>8.2f} {row["status"]}')
+        print_properties(properties.list_properties())
+        #rows = properties.list_properties()
+        #if not rows:
+            #print("No properties yet.")
+        #for row in rows:
+            #rent = row["monthly_rent_pence"] / 100
+            #print(f'{row["property_id"]:>3} {row["name"]:<12} {row["address"]:<30} £{rent:>8.2f} {row["status"]}')
 
 
     if args.command == "view-property":
@@ -113,7 +132,11 @@ def main():
         else:
             print(f"Property {args.id} archived.")
 
-    
+
+    if args.command == "search-properties":
+        print_properties(properties.search_properties(args.text, args.status))
+
+
 
 if __name__ == "__main__":
     main()
