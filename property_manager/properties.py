@@ -85,3 +85,23 @@ def archive_property(property_id):      # this will help keep the our files inst
         connection.close()
 
 
+# find properties either by name, address, status, or both 
+
+def search_properties(text=None, status=None):
+    pattern = f"%{text}%" if text else None
+    connection = get_connection()
+    try:
+        return connection.execute(
+            "SELECT property_id, name, address, bedrooms, monthly_rent_pence, status "
+            "FROM properties "
+            "WHERE is_archived = 0 "
+            "AND (? IS NULL OR name LIKE ? OR address LIKE ?) "
+            "AND (? IS NULL OR status = ?) "
+            "ORDER BY property_id",
+            (pattern, pattern, pattern, status, status),
+        ).fetchall()
+    finally:
+        connection.close()
+
+
+
