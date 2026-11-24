@@ -67,9 +67,16 @@ def build_parser():
 #view tenant
     view_tenant = subparsers.add_parser("view-tenant", help="show one tenant in full")
     view_tenant.add_argument("--id", type=int, required=True, help="The tenant Number" )
+
+
+# update tenants
+    update_tenant = subparsers.add_parser("update-tenant", help="change detail of the tenant")
+    update_tenant.add_argument("--id", type=int, required=True, help="The tenant number")
+    update_tenant.add_argument("--full_name")
+    update_tenant.add_argument("--email")
+    update_tenant.add_argument("--phone")
+    update_tenant.add_argument("--note")
     return parser
-
-
 
 
 
@@ -169,7 +176,7 @@ def main():
 
 
     if args.command == "view-tenant":
-        row = tenants.get_tenat(args.id)
+        row = tenants.get_tenant(args.id)
         if row is None:
             print(f"No tenant with id {args.id}.")
         else:
@@ -177,6 +184,25 @@ def main():
             print(f' email: {row["email"]}')
             print(f' phone: {row["phone"]}')
             print(f' note: {row["note"]}')
+
+
+    if args.command == "update-tenant":
+        try:
+            changed = tenants.update_tenant(
+                args.id,
+                full_name=args.full_name,
+                email=args.email,
+                phone=args.phone,
+                note=args.note,
+            )
+        except sqlite3.IntegrityError as error:
+            print(f'Could not oupdate tenant: {error}')
+        else:
+            if changed == 0:
+                print(f'No tenant with id: {args.id}')
+            else:
+                print(f'Tenant {args.id} Updated ')
+
 
 
 
