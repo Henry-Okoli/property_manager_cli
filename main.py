@@ -1,7 +1,7 @@
 import argparse
 import sqlite3
 from decimal import Decimal, InvalidOperation
-from property_manager import db, properties
+from property_manager import db, properties, tenants
 
 
 def pounds_to_pence(text):
@@ -54,7 +54,19 @@ def build_parser():
     add.add_argument("--rent", required=True, type=pounds_to_pence, help="Monthly rent in pounds, e.g. 850")
     add.add_argument("--bedrooms", type=int, help="Number of bedrooms")
     view.add_argument("--id", type=int, required=True, help="The property number")
+   
+# add tenants
+    add_tenant_parser = subparsers.add_parser("add-tenant", help="regiester a new tenants")
+    add_tenant_parser.add_argument("--name", required=True, help="full name")
+    add_tenant_parser.add_argument("--email")
+    add_tenant_parser.add_argument("--phone")
+    add_tenant_parser.add_argument("--notes")
+   
+   
     return parser
+
+
+
 
 
 def print_properties(rows):
@@ -137,6 +149,15 @@ def main():
         print_properties(properties.search_properties(args.text, args.status))
 
 
+    if args.command == "add-tenant":
+        try:
+            tenant_id = tenants.add_tenants(
+                args.name, email=args.email, phone=args.phone, note=args.notes
+            )
+        except sqlite3.IntegrityError as error:
+            print(f"Could not add the tenant: {error}")
+        else:
+            print(f"Tenant {tenants} added: {args.name}")
 
 if __name__ == "__main__":
     main()
