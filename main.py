@@ -54,7 +54,9 @@ def build_parser():
     add.add_argument("--rent", required=True, type=pounds_to_pence, help="Monthly rent in pounds, e.g. 850")
     add.add_argument("--bedrooms", type=int, help="Number of bedrooms")
     view.add_argument("--id", type=int, required=True, help="The property number")
-   
+
+
+# Tenent commands
 # add tenants
     add_tenant_parser = subparsers.add_parser("add-tenant", help="regiester a new tenants")
     add_tenant_parser.add_argument("--name", required=True, help="full name")
@@ -62,7 +64,9 @@ def build_parser():
     add_tenant_parser.add_argument("--phone")
     add_tenant_parser.add_argument("--notes")
    
-   
+#view tenant
+    view_tenant = subparsers.add_parser("view-tenant", help="show one tenant in full")
+    view_tenant.add_argument("--id", type=int, required=True, help="The tenant Number" )
     return parser
 
 
@@ -85,6 +89,8 @@ def main():
     if args.command == "init":
         db.init_db()
         print("Database ready")
+
+
     if args.command == "add-property":
         try:
             property_id = properties.add_property(
@@ -149,6 +155,8 @@ def main():
         print_properties(properties.search_properties(args.text, args.status))
 
 
+# Teneants command
+
     if args.command == "add-tenant":
         try:
             tenant_id = tenants.add_tenants(
@@ -158,6 +166,19 @@ def main():
             print(f"Could not add the tenant: {error}")
         else:
             print(f"Tenant {tenants} added: {args.name}")
+
+
+    if args.command == "view-tenant":
+        row = tenants.get_tenat(args.id)
+        if row is None:
+            print(f"No tenant with id {args.id}.")
+        else:
+            print(f' tenant {row["tenant_id"]}: {row["full_name"]}')
+            print(f' email: {row["email"]}')
+            print(f' phone: {row["phone"]}')
+            print(f' note: {row["note"]}')
+
+
 
 if __name__ == "__main__":
     main()
