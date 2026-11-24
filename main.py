@@ -76,7 +76,15 @@ def build_parser():
     update_tenant.add_argument("--email")
     update_tenant.add_argument("--phone")
     update_tenant.add_argument("--note")
+
+# search tenants
+    search = subparsers.add_parser("search-tenants", help="Find tenant by name, email, or phone")
+    search.add_argument("--text", help="Part of the name or address")
+
     return parser
+
+
+
 
 
 
@@ -86,6 +94,15 @@ def print_properties(rows):
     for row in rows:
         rent = row["monthly_rent_pence"] / 100
         print(f'{row["property_id"]:>3} {row["name"]:<12} {row["address"]:<30} £{rent:>8.2f} {row["status"]}')
+
+
+def print_tenants(rows):
+    if not rows:
+        print("No tenants found.")
+    for row in rows:
+        print(f'{row["tenant_id"]:>3} {row["full_name"]:<20} {row["email"] or "-":<30} {row["phone"] or "-"}')
+            
+
 
 
 
@@ -203,6 +220,9 @@ def main():
             else:
                 print(f'Tenant {args.id} Updated ')
 
+
+    if args.command == "search-tenants":
+        print_tenants(tenants.search_tenant(args.text))
 
 
 
