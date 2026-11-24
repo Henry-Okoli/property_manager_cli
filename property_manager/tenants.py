@@ -14,3 +14,14 @@ def add_tenants(full_name, email=None, phone=None, note =None):
         return cursor.lastrowid
     finally:
         connection.close
+
+def get_tenat(tenant_id):
+    connection = get_connection()
+    try:
+        rows = connection.execute(
+            "SELECT *  FROM tenants WHERE tenant_id = ?",
+            (tenant_id,),
+        ).fetchone()
+        return rows
+    finally:
+        connection.close
