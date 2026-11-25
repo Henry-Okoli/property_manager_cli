@@ -20,3 +20,18 @@ CREATE TABLE IF NOT EXISTS tenants (
     created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
+
+CREATE TABLE IF NOT EXISTS leases(
+    lease_id INTEGER PRIMARY KEY,
+    property_id INTEGER NOT NULL REFERENCES properties (property_id),
+    tenant_id INTEGER NOT NULL REFERENCES tenants (tenant_id),
+    start_date TEXT NOT NULL,
+    end_date TEXT NOT NULL,
+    monthly_rent_pence INTEGER NOT NULL CHECK (monthly_rent_pence > 0),
+    status TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('active', 'terminated')),
+    terminated_on TEXT,
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CHECK (end_date > start_date)
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS one_active_lease_per_property ON leases (property_id) WHERE status = 'active';
