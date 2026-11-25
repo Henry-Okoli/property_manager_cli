@@ -1,9 +1,11 @@
 import argparse
 import sqlite3
+from datetime import date
 from decimal import Decimal, InvalidOperation
-from property_manager import db, properties, tenants
+from property_manager import db, properties, tenants, leases
 
 
+# convert decimal amount into pence
 def pounds_to_pence(text):
     try:
         pounds = Decimal(text)
@@ -12,6 +14,16 @@ def pounds_to_pence(text):
     if pounds <= 0:
         raise argparse.ArgumentTypeError("rent must be more than Zero")
     return int(pounds * 100)
+
+
+# datatime checker
+def valid_date(text):
+    try:
+        return date.fromisoformat(text).isoformat()
+    except ValueError:
+        raise argparse.ArgumentError(
+            f"'{text}' is not a valid date. Use YYYY-MM-DD  for example 2026-12-10"
+        )
 
     
 def build_parser():
@@ -81,9 +93,16 @@ def build_parser():
     search = subparsers.add_parser("search-tenants", help="Find tenant by name, email, or phone")
     search.add_argument("--text", help="Part of the name or address")
 
+
+
+# leases property command
+    create_lease = subparsers.add_parser("create-lease", help="create a lease for a tenant")
+    create_lease.add_argument("--property", type=int, required=True, help="Property number")
+    create_lease.add_argument("--tenant", type=int, required=True, help="Tenant number")
+    create_lease.add_argument("--start", type=valid_date, required=True, help="start date, YYYY-MM-DD")
+    create_lease.add_argument("--end", type=valid_date, required=True, help="end date, YYYY-MM-DD")
+    create_lease.add_argument("--rent", type=pounds_to_pence, help="Monthly rent in pounds (default: the property's rent)")
     return parser
-
-
 
 
 
@@ -224,6 +243,17 @@ def main():
     if args.command == "search-tenants":
         print_tenants(tenants.search_tenant(args.text))
 
+
+# leases command creation
+    if args.command == "create-lease":
+        try:
+            lease_id = leases.create_leases(
+                args.property, args.tenant, args.start, args.end, rent_pence=args.rent
+            )
+        except(ValueError, sqlite3.IntegrityError) as error:
+            print(f'Could not create the lease: {error}')
+        else:
+            print(f'Lease {lease_id} created.')
 
 
 if __name__ == "__main__":
