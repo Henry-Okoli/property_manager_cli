@@ -102,7 +102,16 @@ def build_parser():
     create_lease.add_argument("--start", type=valid_date, required=True, help="start date, YYYY-MM-DD")
     create_lease.add_argument("--end", type=valid_date, required=True, help="end date, YYYY-MM-DD")
     create_lease.add_argument("--rent", type=pounds_to_pence, help="Monthly rent in pounds (default: the property's rent)")
+
+
+# search leases 
+    list_lease = subparsers.add_parser("list-leases", help="list a lease for a tenant")
+    list_lease.add_argument("--status", choices=["active", "terminated"])
+
     return parser
+
+
+
 
 
 
@@ -122,6 +131,11 @@ def print_tenants(rows):
         print(f'{row["tenant_id"]:>3} {row["full_name"]:<20} {row["email"] or "-":<30} {row["phone"] or "-"}')
             
 
+def print_leases(rows):
+    if not rows:
+        print("No leases found.")
+    for row in rows:
+        print(f'{row["lease_id"]}, {row["property_name"]} {row["tenant_name"]} {row["start_date"]} {row["end_date"]} {row["monthly_rent_pence"]} {row["status"]}')
 
 
 
@@ -198,6 +212,7 @@ def main():
         print_properties(properties.search_properties(args.text, args.status))
 
 
+
 # Teneants command
 
     if args.command == "add-tenant":
@@ -254,6 +269,14 @@ def main():
             print(f'Could not create the lease: {error}')
         else:
             print(f'Lease {lease_id} created.')
+
+# list leases command
+    if args.command == "list-leases":
+        print_leases(leases.list_leases(args.status))
+
+
+
+
 
 
 if __name__ == "__main__":
