@@ -40,5 +40,18 @@ def create_leases(property_id, tenant_id, start_date, end_date, rent_pence=None)
         connection.close()
 
 
-
-            
+def list_leases(status=None):
+    connection = get_connection()
+    try:
+        rows = connection.execute(
+            "SELECT l.lease_id, p.name AS property_name, t.full_name AS tenant_name, l.start_date, l.end_date, l.monthly_rent_pence, l.status "
+            "FROM leases l " 
+            "JOIN properties p ON p.property_id = l.property_id "
+            "JOIN tenants t ON t.tenant_id = l.tenant_id "
+            "WHERE (? IS NULL OR l.status = ?) "
+            "ORDER BY l.lease_id",
+            (status, status),
+        ).fetchall()
+        return rows
+    finally:
+        connection.close()
