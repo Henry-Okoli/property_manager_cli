@@ -20,7 +20,6 @@ def create_leases(property_id, tenant_id, start_date, end_date, rent_pence=None)
             if tenant_row is None:
                 raise ValueError(f'No active tenant with is {tenant_id}.')
 
-
             if rent_pence is None:
                 rent_pence = property_row["monthly_rent_pence"]    
 
@@ -83,5 +82,19 @@ def terminate_lease(lease_id):
         connection.close()
             
 
-            
-
+def expiring_leases(days):
+    connection = get_connection()
+    try:
+       rows = connection.execute(
+            "SELECT  l.lease_id, p.name AS property_name, t.full_name AS tenant_name, "
+            "l.start_date, l.end_date, l.monthly_rent_pence, l.status "
+            "FROM leases l "
+            "JOIN properties p ON p.property_id = l.property_id "
+            "JOIN tenants t ON t.tenant_id = l.tenant_id "
+            "WHERE l.status = 'active' AND l.end_date <= date('now', ?) "
+            "ORDER BY l.end_date",
+            (f"+{days} days",),
+        ).fetchall()
+       return rows
+    finally:
+        connection.close()

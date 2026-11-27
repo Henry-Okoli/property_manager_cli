@@ -110,10 +110,15 @@ def build_parser():
 
 
 # terminate leasese
-    terminate= subparsers.add_parser("terminate-lease", help="End a lease and free up property space")
+    terminate = subparsers.add_parser("terminate-lease", help="End a lease and free up property space")
     terminate.add_argument("--id", type=int, required=True, help="The lease Number" )
 
 
+# expiring leases
+    expiring = subparsers.add_parser("expiring-leases", help="List active list ending soon")
+    expiring.add_argument("--days", type=int, default=60, help="Look this many days ahead (default 60)")
+    
+    
     return parser
 
 
@@ -291,6 +296,10 @@ def main():
             print(f'Could not terminater the lease: {error}.')
         else:
             print(f'Lease {args.id} terminated.')
+
+# expiring leases
+    if args.command == "expiring-leases":
+        print_leases(leases.expiring_leases(args.days))
 
 
 
