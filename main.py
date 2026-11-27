@@ -105,8 +105,14 @@ def build_parser():
 
 
 # search leases 
-    list_lease = subparsers.add_parser("list-leases", help="list a lease for a tenant")
+    list_lease = subparsers.add_parser("list-leases", help="List leases, optionally by status")
     list_lease.add_argument("--status", choices=["active", "terminated"])
+
+
+# terminate leasese
+    terminate= subparsers.add_parser("terminate-lease", help="End a lease and free up property space")
+    terminate.add_argument("--id", type=int, required=True, help="The lease Number" )
+
 
     return parser
 
@@ -135,7 +141,9 @@ def print_leases(rows):
     if not rows:
         print("No leases found.")
     for row in rows:
-        print(f'{row["lease_id"]}, {row["property_name"]} {row["tenant_name"]} {row["start_date"]} {row["end_date"]} {row["monthly_rent_pence"]} {row["status"]}')
+        rent = row["monthly_rent_pence"] /100
+        print(f'{row["lease_id"]}, {row["property_name"]} {row["tenant_name"]} {row["start_date"]} {row["end_date"]} £{rent:>8.2f} {row["status"]}')
+
 
 
 
@@ -275,7 +283,14 @@ def main():
         print_leases(leases.list_leases(args.status))
 
 
-
+# terminate leases
+    if args.command == "terminate-lease":
+        try:
+           leases.terminate_lease(args.id)
+        except ValueError as error:
+            print(f'Could not terminater the lease: {error}.')
+        else:
+            print(f'Lease {args.id} terminated.')
 
 
 
