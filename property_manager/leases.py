@@ -55,3 +55,33 @@ def list_leases(status=None):
         return rows
     finally:
         connection.close()
+
+
+def terminate_lease(lease_id):
+    connection = get_connection()
+    try:
+        with connection:
+            lease_row = connection.execute(
+                "SELECT property_id FROM leases "
+                "WHERE lease_id = ? AND status = 'active'",
+                (lease_id,),
+            ).fetchone()
+            if lease_row is None:
+                raise ValueError(f'No active leases with id {lease_id}.')
+
+            connection.execute(
+                "UPDATE leases SET status = 'terminated', terminated_on = date('now') " 
+                "WHERE  lease_id = ?",
+                (lease_id,),
+            )
+
+            connection.execute(                
+                "UPDATE properties SET status = 'available' WHERE  property_id = ?",
+                (lease_row["property_id"],),
+            )
+    finally:
+        connection.close()
+            
+
+            
+
