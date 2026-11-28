@@ -98,3 +98,38 @@ def expiring_leases(days):
        return rows
     finally:
         connection.close()
+
+def tenant_leases(tenant_id):
+    connection = get_connection()
+    try:
+        rows = connection.execute(
+            "SELECT l.lease_id, p.name AS property_name, t.full_name AS tenant_name, l.start_date, l.end_date, l.monthly_rent_pence, l.status "
+            "FROM leases l " 
+            "JOIN properties p ON p.property_id = l.property_id "
+            "JOIN tenants t ON t.tenant_id = l.tenant_id "
+            "WHERE l.tenant_id = ? "
+            "ORDER BY l.start_date",
+            (tenant_id,),
+        ).fetchall()
+        return rows
+    finally:
+        connection.close()
+
+
+
+
+def list_leases(status=None):
+    connection = get_connection()
+    try:
+        rows = connection.execute(
+            "SELECT l.lease_id, p.name AS property_name, t.full_name AS tenant_name, l.start_date, l.end_date, l.monthly_rent_pence, l.status "
+            "FROM leases l " 
+            "JOIN properties p ON p.property_id = l.property_id "
+            "JOIN tenants t ON t.tenant_id = l.tenant_id "
+            "WHERE (? IS NULL OR l.status = ?) "
+            "ORDER BY l.lease_id",
+            (status, status),
+        ).fetchall()
+        return rows
+    finally:
+        connection.close()    
