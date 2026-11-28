@@ -94,7 +94,6 @@ def build_parser():
     search.add_argument("--text", help="Part of the name or address")
 
 
-
 # leases property command
     create_lease = subparsers.add_parser("create-lease", help="create a lease for a tenant")
     create_lease.add_argument("--property", type=int, required=True, help="Property number")
@@ -117,8 +116,13 @@ def build_parser():
 # expiring leases
     expiring = subparsers.add_parser("expiring-leases", help="List active list ending soon")
     expiring.add_argument("--days", type=int, default=60, help="Look this many days ahead (default 60)")
-    
-    
+
+
+# tenant leases
+    tenant = subparsers.add_parser("tenant-leases", help="List all leases a tenant has had")
+    tenant.add_argument("--id", type=int, help="The tenant number")
+
+
     return parser
 
 
@@ -300,6 +304,11 @@ def main():
 # expiring leases
     if args.command == "expiring-leases":
         print_leases(leases.expiring_leases(args.days))
+
+
+    if args.command == "tenant-leases":
+        print_leases(leases.tenant_leases(args.id))
+
 
 
 
